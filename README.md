@@ -6,8 +6,8 @@
 **A precise, verifiable, bilingual (Chinese/English) Chinese lunisolar calendar calculation engine.**  
 **精确、可验证、中英文双语的万年历 Python 计算引擎。**
 
-Built on Dershowitz & Reingold *Calendrical Calculations* and Meeus *Astronomical Algorithms*.  
-基于 Dershowitz & Reingold《Calendrical Calculations》和 Meeus《Astronomical Algorithms》构建。
+Built on [Reingold & Dershowitz *Calendrical Calculations*](https://isidore.co/CalibreLibrary/Reingold,%20Edward%20M_/Calendrical%20Calculations_%20The%20Ultimate%20Edition%20(9573)/Calendrical%20Calculations_%20The%20Ultimate%20Edi%20-%20Reingold,%20Edward%20M_.pdf) and Meeus *Astronomical Algorithms*.  
+基于 Reingold & Dershowitz《Calendrical Calculations》和 Meeus《Astronomical Algorithms》构建。
 
 ---
 
