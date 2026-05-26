@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment
+.env
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data
+chinese_calendar/data/tables/*.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Project
+debug_*.py
+verify_*.py

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>万年历引擎 — 测试界面</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: system-ui, sans-serif; background:#f5f5f5; color:#222; padding:20px; }
+.header { margin-bottom:16px; }
+.header h1 { font-size:20px; font-weight:700; color:#333; }
+.header .sub { font-size:12px; color:#888; margin-top:2px; }
+.layout { display:flex; gap:20px; align-items:flex-start; }
+.panel { background:#fff; border:1px solid #ddd; border-radius:6px; padding:16px; min-width:260px; }
+.panel h2 { font-size:13px; color:#666; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #eee; }
+.row { margin-bottom:10px; }
+.row label { display:block; font-size:12px; color:#888; margin-bottom:3px; }
+.row input,.row select { width:100%; padding:6px 8px; border:1px solid #ccc; border-radius:4px; font-size:13px; }
+.row-inline { display:flex; gap:6px; }
+.row-inline input { flex:1; }
+.btn { padding:8px 16px; background:#4a90d9; color:#fff; border:none; border-radius:4px; font-size:13px; cursor:pointer; }
+.btn:hover { background:#357abd; }
+.btn-sm { padding:4px 10px; font-size:11px; background:#eee; color:#333; cursor:pointer; border:1px solid #ccc; border-radius:3px; }
+.btn-sm:hover { background:#ddd; }
+.quick-btns { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
+#output { flex:1; background:#fff; border:1px solid #ddd; border-radius:6px; padding:12px; min-height:300px; font-family: 'Courier New', monospace; font-size:12px; line-height:1.5; white-space:pre-wrap; overflow:auto; }
+.error { color:#c33; }
+.loading { color:#888; font-style:italic; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>万年历引擎 · 测试界面</h1>
+  <div class="sub">Web API 测试端点 · 引擎 v0.8</div>
+</div>
+
+<div class="layout">
+
+  <!-- Input Panel -->
+  <div class="panel">
+    <h2>输入</h2>
+
+    <div class="row">
+      <label>公历日期</label>
+      <div class="row-inline">
+        <input type="number" id="year" value="2026" min="1900" max="2100" placeholder="年">
+        <input type="number" id="month" value="5" min="1" max="12" placeholder="月">
+        <input type="number" id="day" value="24" min="1" max="31" placeholder="日">
+      </div>
+    </div>
+
+    <div class="row">
+      <label>时辰 (hours)</label>
+      <input type="number" id="hours" value="12" min="0" max="24" step="0.5">
+    </div>
+
+    <div class="row">
+      <label>语言</label>
+      <select id="locale">
+        <option value="zh">中文</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+
+    <button class="btn" onclick="query()">查询</button>
+
+    <div style="margin-top:14px;padding-top:10px;border-top:1px solid #eee;">
+      <label style="font-size:11px;color:#888;margin-bottom:4px;">快速测试</label>
+      <div class="quick-btns">
+        <button class="btn-sm" onclick="loadTest(2026,5,24)">今天</button>
+        <button class="btn-sm" onclick="loadTest(2026,2,17)">春节</button>
+        <button class="btn-sm" onclick="loadTest(1942,11,8)">1942-11</button>
+        <button class="btn-sm" onclick="loadTest(2023,3,22)">闰二月</button>
+        <button class="btn-sm" onclick="loadTest(1984,12,8)">边界测试</button>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label style="font-size:11px;color:#888;margin-bottom:4px;">API 端点</label>
+      <div style="font-size:11px;background:#f5f5f5;padding:6px 8px;border-radius:3px;font-family:monospace;word-break:break-all;">
+        GET /api/calendar?year=&amp;month=&amp;day=&amp;hours=&amp;locale=
+      </div>
+    </div>
+  </div>
+
+  <!-- Output Panel -->
+  <div id="output">输入参数后点击「查询」</div>
+
+</div>
+
+<script>
+function loadTest(y,m,d) {
+  document.getElementById('year').value = y;
+  document.getElementById('month').value = m;
+  document.getElementById('day').value = d;
+  query();
+}
+
+async function query() {
+  const year = document.getElementById('year').value;
+  const month = document.getElementById('month').value;
+  const day = document.getElementById('day').value;
+  const hours = document.getElementById('hours').value;
+  const locale = document.getElementById('locale').value;
+
+  const out = document.getElementById('output');
+  out.innerHTML = '<span class="loading">请求中...</span>';
+
+  try {
+    const url = `/api/calendar?year=${year}&month=${month}&day=${day}&hours=${hours}&locale=${locale}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    if (data.error) {
+      out.innerHTML = `<span class="error">⚠ 错误: ${data.error}</span>`;
+      return;
+    }
+
+    // 格式化输出
+    const lines = [];
+    lines.push(`=== ${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')} ${hours}h ===`);
+    lines.push(`RD: ${data.rd}`);
+    lines.push(`星期: ${data.weekday} / ${data.weekday_en}`);
+    lines.push(`八字: ${data.bazi_str}`);
+    lines.push(`生肖: ${data.shengxiao_zh} / ${data.shengxiao_en}`);
+    lines.push('');
+
+    // 四柱
+    if (data.bazi) {
+      lines.push('-- 四柱 --');
+      ['year','month','day','hour'].forEach(p => {
+        const c = data.bazi[p];
+        if (c) lines.push(`  ${p}: ${c.name_zh} (${c.name_en})${c.nayin ? ' ['+c.nayin+']' : ''}`);
+      });
+      lines.push('');
+    }
+
+    // 农历
+    if (data.lunar) {
+      lines.push(`-- 农历 --`);
+      lines.push(`  ${data.lunar_str}`);
+      lines.push(`  年=${data.lunar.year} 月=${data.lunar.month} 日=${data.lunar.day}${data.lunar.is_leap ? ' (闰)' : ''}`);
+      lines.push('');
+    }
+
+    // 术数文化层（lunar_python）
+    if (data.culture) {
+      const c = data.culture;
+      lines.push(`-- 术数文化层 --`);
+      lines.push(`  星宿: ${c.xiu} (${c.xiu_luck || ''})`);
+      lines.push(`  彭祖百忌: ${c.peng_zu_gan || ''} ${c.peng_zu_zhi || ''}`);
+      lines.push(`  宜: ${(c.yi||[]).join(', ')}`);
+      lines.push(`  忌: ${(c.ji||[]).join(', ')}`);
+      lines.push(`  冲: ${c.chong || ''} (${c.chong_shengxiao || ''}) 煞: ${c.sha || ''}`);
+      lines.push(`  喜神: ${c.xi_shen || ''} | 财神: ${c.cai_shen || ''} | 福神: ${c.fu_shen || ''}`);
+      lines.push(`  阳贵: ${c.yang_gui || ''} | 阴贵: ${c.yin_gui || ''}`);
+      if (c.jie_qi) lines.push(`  节气: ${c.jie_qi}`);
+      lines.push('');
+    }
+
+    // 节气
+    if (data.solar_term) {
+      lines.push('-- 节气 --');
+      lines.push(`  当前: ${data.solar_term.name_zh} (${data.solar_term.name_en})`);
+      if (data.next_solar_term) {
+        const nt = data.next_solar_term;
+        lines.push(`  下一: ${nt.name_zh} (${nt.name_en})  RD=${nt.rd.toFixed(4)}`);
+      }
+      lines.push(`  全年节气数: ${(data.solar_terms||[]).length}`);
+      lines.push('');
+    }
+
+    // 原始 JSON
+    lines.push('-- 原始 JSON --');
+    lines.push(JSON.stringify(data, null, 2));
+
+    out.innerHTML = lines.join('\n');
+
+  } catch (e) {
+    out.innerHTML = `<span class="error">⚠ 请求失败: ${e.message}</span>`;
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+# Put validation data files here:
+# - chinese_calendar.db  — HKO lunar calendar database (1901-2100)
+# - solar_terms.csv     — Solar term verification data (future)
+# - bazi_cases.csv      — Bazi verification data (future)
