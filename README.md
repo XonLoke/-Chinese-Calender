@@ -39,14 +39,18 @@ Built on Dershowitz & Reingold *Calendrical Calculations* and Meeus *Astronomica
 
 ## Quick Start / 快速开始
 
-```bash
-# Install / 安装
+### Install / 安装
+```
 pip install pymeeus astronomy-engine lunar_python
+```
 
-# Or minimal (no astronomy) / 或最小安装
+### Or minimal (no astronomy) / 或最小安装
+```
 pip install pymeeus
+```
 
-# Test / 测试
+### Test / 测试
+```
 cd chinese_calendar
 python -c "
 from chinese_calendar.api import Calendar
@@ -59,30 +63,31 @@ print(cal.shengxiao.zh)  # 马
 
 ### Web Interface / 网页界面
 
-```bash
-python web_interface/server.py
-# Open http://localhost:8765
+\# Open http://localhost:8765
 ```
+python web_interface/server.py
+```
+
 
 ---
 
 ## Architecture / 架构
 
 ```
-┌──────────────────────────────────┐
-│  Web UI (test interface)         │
-├──────────────────────────────────┤
-│  API + Locale (Calendar class)   │
-├──────────────────────────────────┤
-│  Calendar Layer                  │
-│  (Gregorian/Lunar/Ganzhi ↔ R.D.) │
-├──────────────────────────────────┤
-│  Astronomy Layer                 │
-│  (Sun/Moon/Solar Terms)          │
-├──────────────────────────────────┤
-│  Core Layer                      │
+┌───────────────────────────────────┐
+│  Web UI (test interface)          │
+├───────────────────────────────────┤
+│  API + Locale (Calendar class)    │
+├───────────────────────────────────┤
+│  Calendar Layer                   │
+│  (Gregorian/Lunar/Ganzhi ↔ R.D.)  │
+├───────────────────────────────────┤
+│  Astronomy Layer                  │
+│  (Sun/Moon/Solar Terms)           │
+├───────────────────────────────────┤
+│  Core Layer                       │
 │  (RataDie/Time Systems/Constants) │
-└──────────────────────────────────┘
+└───────────────────────────────────┘
 ```
 
 **Rata Die (R.D.)** is the universal bridge — every calendar converts to/from R.D., never directly.
