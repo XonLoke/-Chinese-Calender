@@ -17,33 +17,42 @@ Built on Dershowitz & Reingold *Calendrical Calculations* and Meeus *Astronomica
 **This is a CALCULATION ENGINE, not a lookup library.**  
 **这是天文计算引擎，不是查表库。**
 
-Most Chinese calendar libraries (such as 6tail/lunar-python, cnlunar, etc.) use **precomputed lookup tables** to provide their data. This engine is fundamentally different — it **computes everything from first principles** using VSOP87 solar theory and Dershowitz & Reingold algorithms, then **validates against authoritative data**.
+Most Chinese calendar libraries (such as 6tail/lunar-python, cnlunar, etc.) use **precomputed lookup tables** to provide their data. This engine is fundamentally different — it **computes everything from first principles** using VSOP87 solar theory and Dershowitz & Reingold algorithms, then **validates against authoritative data**.  
+市面上的农历库（如 6tail/lunar-python、cnlunar 等）大多使用**预计算查表法**。本引擎完全不同——它通过 VSOP87 太阳理论和 D&R 算法**从头计算**，再用权威数据**验证**。
 
-### What makes this engine unique
+### What makes this engine unique / 本引擎的独特之处
 
-| Aspect | This Engine | Other Libraries |
+| Aspect / 对比项 | This Engine / 本引擎 | Other Libraries / 其他库 |
 |--------|------------|----------------|
-| **Core method** | Astronomical calculation (VSOP87, Newton's method) | Precomputed lookup tables |
-| **Lunar data** | D&R algorithm → verified against HKO 100% | Direct table query |
-| **Solar terms** | VSOP87 + Newton solver | Table interpolation |
-| **Transparency** | Every calculation step is verifiable | Black box (table source unclear) |
-| **Zero-dependency** | BaZi/Zodiac/Weekday work without any pip install | Require full library |
-| **Accuracy** | 100% against HKO (1901-2100) | Depends on table source |
-| **Architecture** | Modular 4-layer: Core → Astronomy → Calendar → API | Monolithic |
+| **Core method / 核心方法** | Astronomical calculation (VSOP87, Newton) 天文计算 | Precomputed lookup tables 预计算查表 |
+| **Lunar data / 农历数据** | D&R algorithm → verified against HKO 100% 算法计算→HKO 验证 | Direct table query 直接查表 |
+| **Solar terms / 节气** | VSOP87 + Newton solver 天文求解 | Table interpolation 查表插值 |
+| **Transparency / 透明度** | Every step verifiable 每一步可验证 | Black box 黑箱（表来源不明）|
+| **Zero-dependency / 零依赖** | BaZi/Zodiac/Weekday with no pip install 不用安装任何库 | Require full library 需安装完整库 |
+| **Accuracy / 准确率** | 100% vs HKO (1901-2100) | Depends on table source 取决于表来源 |
+| **Architecture / 架构** | Modular 4-layer 模块化四层 | Monolithic 单体 |
 
-### When to use this engine
+### When to use this engine / 什么时候用本引擎
 
-✅ You need a **transparent, verifiable** calendar foundation for your project  
+✅ You need a **transparent, verifiable** calendar foundation  
+✅ 你需要**透明可验证**的历法基础  
 ✅ You want **astronomical-grade precision** for solar terms and lunar months  
+✅ 你需要节气/农历的**天文级精度**  
 ✅ You need **bilingual (zh/en)** output  
-✅ You plan to build **metaphysics modules** (BaZi, Flying Stars, Qi Men, etc.) on top  
-✅ You want to **understand how** calendar calculations work, not just get the answer
+✅ 你需要**中英文双语**输出  
+✅ You plan to build **metaphysics modules** (BaZi, Flying Stars, Qi Men, etc.)  
+✅ 你计划构建八字、飞星、奇门等**术数模块**  
+✅ You want to **understand how** calendar calculations work  
+✅ 你想**理解历法计算的原理**
 
-### When other libraries may be better
+### When other libraries may be better / 什么时候用其他库更好
 
-❌ You need a quick, zero-setup calendar utility (use 6tail/lunar-python)  
-❌ You need Buddhist/Taoist calendars (6tail/lunar-python has these)  
-❌ You need multi-language support beyond zh/en (Java, JS, Go, etc.)
+❌ You need a quick, zero-setup calendar utility → use 6tail/lunar-python  
+❌ 你需要快速、零配置的历法工具  
+❌ You need Buddhist/Taoist calendars → 6tail/lunar-python has these  
+❌ 你需要佛历、道历  
+❌ You need multi-language support (Java, JS, Go, etc.)  
+❌ 你需要多语言支持（Java、JS、Go 等）
 
 ---
 
@@ -68,10 +77,10 @@ Most Chinese calendar libraries (such as 6tail/lunar-python, cnlunar, etc.) use 
 ### Accuracy / 精度
 - **100% exact match** vs Hong Kong Observatory data (1901-2100, 73,049 dates)
 - **100% exact match** vs lunar_python (500 random dates)
-- Spring Festival (春节) dates: all correct 1900-2100
-- Leap month years: all correct
-- 24 Solar Terms: VSOP87 precision via astronomy-engine
-- Zero-dependency operation for BaZi/Weekday/Zodiac
+- Spring Festival (春节) dates: all correct 1900-2100 — 春节日期全部正确
+- Leap month years: all correct — 闰月年份全部正确
+- 24 Solar Terms: VSOP87 precision via astronomy-engine — 24节气 VSOP87 天文精度
+- Zero-dependency operation for BaZi/Weekday/Zodiac — 八字/星期/生肖零依赖
 
 ---
 
@@ -123,29 +132,31 @@ python web_interface/server.py
 └──────────────────────────────────┘
 ```
 
-**Rata Die (R.D.)** is the universal bridge — every calendar converts to/from R.D., never directly.
+**Rata Die (R.D.)** is the universal bridge — every calendar converts to/from R.D., never directly.  
+**Rata Die（R.D.）** 是通用桥梁——所有历法都通过 R.D. 互相转换，不直接依赖。
 
 ---
 
 ## Dependencies / 依赖
 
-| Package | Required | Purpose |
+| Package / 包 | Required / 必需 | Purpose / 用途 |
 |---------|----------|---------|
-| Python ≥3.10 | ✅ | Core engine runs with zero deps for BaZi |
-| PyMeeus 0.5.12 | Optional | Solar longitude / solar terms (VSOP87) |
-| astronomy-engine 2.1+ | Optional | New moon refinement (VSOP87) |
-| lunar-python 1.4+ | Optional | Cultural layer (mansions, taboos, etc.) |
+| Python ≥3.10 | ✅ | Core engine runs with zero deps for BaZi / 八字等核心功能零依赖 |
+| PyMeeus 0.5.12 | Optional 可选 | Solar longitude / solar terms (VSOP87) 太阳黄经/节气 |
+| astronomy-engine 2.1+ | Optional 可选 | New moon refinement (VSOP87) 新月精化 |
+| lunar-python 1.4+ | Optional 可选 | Cultural layer (mansions, taboos, etc.) 术数文化层（星宿、宜忌等） |
 
 ---
 
 ## Validation / 验证
 
-**Hong Kong Observatory data** (73,049 dates, 1901-2100) — **100% match** ✅
-- Random dates: **100%** (500 random samples)
-- Spring Festival (春节): all 201 years correct
-- Leap month years: all correct
-- 500-edge-date test: **100%**
-- 15-date cross-validation vs lunar_python: **100%**
+**Hong Kong Observatory data** (73,049 dates, 1901-2100) — **100% match** ✅  
+**香港天文台数据**（73,049 条，1901-2100）— **100% 一致**
+- Random dates: **100%** (500 random samples) — 随机日期抽样 500 组
+- Spring Festival (春节): all 201 years correct — 201 年春节全部正确
+- Leap month years: all correct — 闰月年份全部正确
+- 500-edge-date test: **100%** — 500 组边界日期测试
+- 15-date cross-validation vs lunar_python: **100%** — 与 lunar_python 交叉验证
 
 ---
 
@@ -153,15 +164,15 @@ python web_interface/server.py
 
 ```
 chinese_calendar/
-├── core/           # RataDie, time systems, constants
-├── astronomy/      # Sun (VSOP87), Moon, solar terms
-├── calendar/       # Converters, Chinese lunar, Ganzhi
-├── api/            # Calendar unified class, lunar culture
-├── locale/         # Bilingual (zh/en) strings
-├── data/           # Cache layer, precompute
-├── inference/      # Future: Shishen, Dayun (placeholder)
-└── tests/           # Pytest suite
-web_interface/      # Test server + HTML UI
+├── core/           # RataDie, time systems, constants / 核心类型、时间系统、常数
+├── astronomy/      # Sun (VSOP87), Moon, solar terms / 太阳、月亮、节气
+├── calendar/       # Converters, Chinese lunar, Ganzhi / 历法转换、农历、干支
+├── api/            # Calendar unified class, lunar culture / Calendar 统一接口、术数文化层
+├── locale/         # Bilingual (zh/en) strings / 中英文双语字符串
+├── data/           # Cache layer, precompute / 缓存层、预计算
+├── inference/      # Future: Shishen, Dayun / 未来：十神、大运（占位）
+└── tests/           # Pytest suite / 测试套件
+web_interface/      # Test server + HTML UI / 测试服务器 + 网页界面
 ```
 
 ---
@@ -174,8 +185,10 @@ MIT
 
 ## References / 参考
 
-- Dershowitz & Reingold, *Calendrical Calculations*
-- Meeus, *Astronomical Algorithms*
-- VSOP87 — French Bureau des Longitudes
-- [6tail/lunar-python](https://github.com/6tail/lunar-python) — cross-validation reference
-- [cosinekitty/astronomy](https://github.com/cosinekitty/astronomy) — Astronomy Engine
+- Dershowitz & Reingold, *Calendrical Calculations* — 历法算法经典著作
+- Meeus, *Astronomical Algorithms* — 天文算法标准参考
+- VSOP87 — French Bureau des Longitudes — 行星运动理论
+- [6tail/lunar-python](https://github.com/6tail/lunar-python) — cross-validation reference / 交叉验证参考
+- [cosinekitty/astronomy](https://github.com/cosinekitty/astronomy) — Astronomy Engine / 天文计算引擎
+- [cnlunar](https://github.com/OPN48/cnlunar) — 协纪辨方书黄历库
+- [Hong Kong Observatory](https://www.weather.gov.hk/sc/gts/time/conversion.htm) — HKO calendar data / 香港天文台历法数据
