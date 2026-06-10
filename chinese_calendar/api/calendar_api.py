@@ -185,11 +185,21 @@ class Calendar:
     @property
     def lunar(self):
         if self._lunar is None:
+            # 1) 查 HKO 缓存（1901-2100 全覆盖，优先使用）
             try:
-                import chinese_calendar.calendar.chinese as _c
-                self._lunar = _c.chinese_from_fixed(self.rd)
+                from chinese_calendar.data.hko_cache import hko_lookup
+                hko = hko_lookup(str(self.rd))
+                if hko is not None:
+                    self._lunar = hko
             except Exception:
-                return None
+                pass
+            # 2) 回退到 D&R 算法（用于 HKO 范围外的日期）
+            if self._lunar is None:
+                try:
+                    import chinese_calendar.calendar.chinese as _c
+                    self._lunar = _c.chinese_from_fixed(self.rd)
+                except Exception:
+                    return None
         if self._lunar is None:
             return None
         return LunarDate(year=self._lunar[0], month=self._lunar[1], day=self._lunar[2], is_leap=self._lunar[3])

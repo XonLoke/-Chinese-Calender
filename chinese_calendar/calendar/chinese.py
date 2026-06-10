@@ -367,12 +367,10 @@ def chinese_from_fixed(rd: int | RataDie | Moment) -> tuple[int, int, int, bool]
         # 而非 UTC。新月在北京时间 00:00-24:00 内发生，
         # 则当天即为朔日。UTC+8 = UTC + 1/3 天。
         # D&R 算法用 UTC，需修正为中国时区。
-        # 对午夜附近的新月（00:00-00:30 中国时间），
-        # 使用 0.5 小时 epsilon 将月界归于前一日，
-        # 与传统历法朔日约定一致。
-        _MOON_BOUNDARY_EPSILON = 1.0 / 48.0
-        start_day = int(start_day_float + _CHINA_TZ - _MOON_BOUNDARY_EPSILON)
-        end_day = int(end_float + _CHINA_TZ - _MOON_BOUNDARY_EPSILON)
+        # 微小 epsilon (1分钟) 用于处理新月精确落在整日边界时的取整。
+        _BOUNDARY_EPSILON = 1.0 / 1440.0
+        start_day = int(start_day_float + _CHINA_TZ - _BOUNDARY_EPSILON)
+        end_day = int(end_float + _CHINA_TZ - _BOUNDARY_EPSILON)
 
         if start_day <= _rd_float < end_day:
             month = month_numbers[i]
