@@ -153,6 +153,8 @@ def _has_major_solar_term(start: Moment, end: Moment) -> bool:
     """判断区间 [start, end) 内是否包含中气（major solar term）。
 
     用于"无中气则闰"的闰月判定。
+    注意：与中国历法一致的 UTC+8 日界比较，
+    与 chinese_from_fixed() 中的月份边界算法保持一致。
 
     Args:
         start: 区间起始时刻（朔日，UTC）。
@@ -161,15 +163,19 @@ def _has_major_solar_term(start: Moment, end: Moment) -> bool:
     Returns:
         True 如果该区间内至少有一个中气。
     """
+    _CHINA_TZ = 8.0 / 24.0
+    start_cn = int(start.day + _CHINA_TZ)
+    end_cn = int(end.day + _CHINA_TZ)
+
     # 获取起止日期所在的公历年份范围
     start_year, _, _ = gregorian_from_fixed(RataDie(int(start.day)))
     end_year, _, _ = gregorian_from_fixed(RataDie(int(end.day)))
 
     # 在起止年份前后各扩展一年进行搜索
-    # （中气可能跨年，如 2026-12 的冬至和 2027-01 的大寒）
     for y in range(start_year - 1, end_year + 2):
         for term in major_solar_terms_of_year(y):
-            if start.day < term.day < end.day:
+            term_cn = int(term.day + _CHINA_TZ)
+            if start_cn <= term_cn < end_cn:
                 return True
     return False
 
@@ -285,8 +291,11 @@ def chinese_from_fixed(rd: int | RataDie | Moment) -> tuple[int, int, int, bool]
     # 十一月朔日（包含 s1 的农历月首）
     m11 = _new_moon_on_or_before(s1)
 
-    # 如果 rd 在十一月朔日之前，说明 rd 在上一岁的十月
-    if float(rd_val) < m11.day:
+    _CHINA_TZ = 8.0 / 24.0  # UTC+8 偏移（天）
+    _rd_float = float(rd_val)
+
+    # 如果 rd 在十一月朔日之前（以中国日期为准），说明 rd 在上一岁的十月
+    if _rd_float < int(m11.day + _CHINA_TZ):
         # 回溯到上一岁
         s1 = winter_solstice_on_or_before(Moment(s1.day - 1.0))
         while s1.day >= winter_solstice_on_or_before(Moment(s1.day + 370.0)).day:
@@ -294,14 +303,16 @@ def chinese_from_fixed(rd: int | RataDie | Moment) -> tuple[int, int, int, bool]
         s2 = winter_solstice_on_or_before(Moment(s1.day + 370.0))
         m11 = _new_moon_on_or_before(s1)
 
-    # 如果 rd 在 m11_next 之后（或等于），说明 rd 在下一岁的十月/十一月
-    # 当使用 astronomy-engine 精化后，这种情况更可能出现
+    # 如果 rd 到（或超过）下一岁的十一月朔日（以中国日期为准），
+    # 说明 rd 在下一岁的十月/十一月，需要推进。
     while True:
         _m11_next = _new_moon_on_or_before(s2)
         if _m11_next.day <= m11.day:
             s2 = winter_solstice_on_or_before(Moment(s2.day + 370.0))
             continue
-        if float(rd_val) >= _m11_next.day - 1e-6 and _m11_next.day > m11.day:
+        # 统一使用 UTC+8 整日判断，与月份边界处理一致
+        _m11_next_cn = int(_m11_next.day + _CHINA_TZ)
+        if _rd_float >= _m11_next_cn - 0.01 and _m11_next.day > m11.day:
             # 推进到下一岁
             s1 = s2
             s2 = winter_solstice_on_or_before(Moment(s1.day + 370.0))
@@ -356,11 +367,14 @@ def chinese_from_fixed(rd: int | RataDie | Moment) -> tuple[int, int, int, bool]
         # 而非 UTC。新月在北京时间 00:00-24:00 内发生，
         # 则当天即为朔日。UTC+8 = UTC + 1/3 天。
         # D&R 算法用 UTC，需修正为中国时区。
-        _CHINA_TZ = 8.0 / 24.0  # UTC+8 偏移（天）
-        start_day = int(start_day_float + _CHINA_TZ)
-        end_day = int(end_float + _CHINA_TZ)
+        # 对午夜附近的新月（00:00-00:30 中国时间），
+        # 使用 0.5 小时 epsilon 将月界归于前一日，
+        # 与传统历法朔日约定一致。
+        _MOON_BOUNDARY_EPSILON = 1.0 / 48.0
+        start_day = int(start_day_float + _CHINA_TZ - _MOON_BOUNDARY_EPSILON)
+        end_day = int(end_float + _CHINA_TZ - _MOON_BOUNDARY_EPSILON)
 
-        if start_day <= float(rd_val) < end_day:
+        if start_day <= _rd_float < end_day:
             month = month_numbers[i]
             day = int(rd_val - start_day) + 1
             is_leap = (i == leap_month)
