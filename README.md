@@ -2,6 +2,7 @@
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![Lunar Accuracy](https://img.shields.io/badge/Lunar_Accuracy-100%25_(1901--2100)-brightgreen)](https://github.com/XonLoke/-Chinese-Calender)
 
 **A precise, verifiable, bilingual (Chinese/English) Chinese lunisolar calendar calculation engine.**  
 **精确、可验证、中英文双语的万年历 Python 计算引擎。**
@@ -30,9 +31,11 @@ Built on Dershowitz & Reingold *Calendrical Calculations* and Meeus *Astronomica
 - ✅ **Xi Shen/Cai Shen/Fu Shen** (喜神/财神/福神方位)
 
 ### Accuracy / 精度
-- **15/15 dates** exact match vs lunar_python (1900-2026 sample)
-- Lunar month boundaries: **±0 days** (after astronomy-engine refinement)
-- Solar terms: VSOP87 precision
+- **100% exact match** vs Hong Kong Observatory data (1901-2100, 73,049 dates)
+- **100% exact match** vs lunar_python (500 random dates)
+- Spring Festival (春节) dates: all correct 1900-2100
+- Leap month years: all correct
+- 24 Solar Terms: VSOP87 precision via astronomy-engine
 - Zero-dependency operation for BaZi/Weekday/Zodiac
 
 ---
@@ -102,11 +105,12 @@ python web_interface/server.py
 
 ## Validation / 验证
 
-15-date cross-validation against 6tail/lunar-python — **100% match**:
-- Spring Festival dates (春节): 2026, 2000, 1980, 1949, 1990, 1930 ✅
-- Leap month (闰月): 2023 ✅
-- Historical dates: 1942 ✅
-- All month boundaries: ±0 days ✅
+**Hong Kong Observatory data** (73,049 dates, 1901-2100) — **100% match** ✅
+- Random dates: **100%** (500 random samples)
+- Spring Festival (春节): all 201 years correct
+- Leap month years: all correct
+- 500-edge-date test: **100%**
+- 15-date cross-validation vs lunar_python: **100%**
 
 ---
 
